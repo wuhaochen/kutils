@@ -39,7 +39,7 @@ class KQuestionBase(object):
 
     @staticmethod
     @abc.abstractmethod
-    def from_data(data):
+    def loads(data_str):
         pass
 
 
@@ -61,8 +61,8 @@ class KQuestionBase(object):
         pass
 
 
-    @abc.abstractproperty
-    def data(self):
+    @abc.abstractmethod
+    def dumps(self):
         pass
 
 
@@ -91,5 +91,4 @@ class KQuestion(KQuestionBase):
     @abc.abstractproperty
     def solution(self):
         pass
-    
     
