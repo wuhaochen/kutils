@@ -1,9 +1,14 @@
 language: python
 python:
   - "2.7"
+  - "3.6"
 
 install:
+  - pip install --upgrade pytest pytest-cov codecov
   - pip install .
 
 script:
-  - pytest
+  - pytest --cov=kutils
+
+after_success:
+  - codecov
