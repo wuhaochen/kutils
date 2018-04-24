@@ -7,9 +7,9 @@ import pickle
 
 class KQuestionBase(object):
     """Abstract class for most general Kodethon Questions."""
-    
+
     __metaclass__ = abc.ABCMeta
-    
+
     @classmethod
     def get_subclasses(cls):
         for subclass in cls.__subclasses__():
@@ -57,7 +57,10 @@ class KQuestionBase(object):
     @property
     def output_json(self):
         output_dict = dict()
-        output_dict.update(self._metadata)
+        try:
+            output_dict.update(self._metadata)
+        except AttributeError:
+            pass
         output_dict['description'] = self.description
         output_dict['data'] = self.dumps()
         return json.dumps(output_dict, indent=1)
@@ -71,10 +74,23 @@ class KQuestionBase(object):
     @abc.abstractmethod
     def score_submission(self, submission):
         pass
-    
-    
-    def output_submission(self, submission):
-        score_map = self.score_submission(submission)
+
+
+    def output_submission(self, raw_submission):
+        try:
+            parser = self.parser
+        except AttributeError:
+            parser = None
+
+        if parser is None:
+            submission = raw_submission
+        else:
+            try:
+                submission = parser(raw_submission)
+                score_map = self.score_submission(submission)
+            except kutils.InvalidInput as e:
+                score_map = kutils.score_map(0, comment=str(e))
+
         output_dict = dict()
         output_dict['score'] = score_map['score']
         output_dict['output'] = score_map['output']
@@ -88,9 +104,8 @@ class KQuestion(KQuestionBase):
     @abc.abstractmethod
     def generate_question(**gen_args):
         pass
-    
+
 
     @abc.abstractproperty
     def solution(self):
         pass
-    
