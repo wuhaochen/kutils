@@ -1,6 +1,8 @@
 import abc
+import codecs
 import json
 import logging
+import pickle
 
 
 class KQuestionBase(object):
@@ -34,13 +36,18 @@ class KQuestionBase(object):
             logging.info('Cannot find specific data from metadata:'
                         + e.message)
             data = None
-        return cls.from_data(data)
+        return cls.loads(data)
 
 
     @staticmethod
-    @abc.abstractmethod
-    def loads(data_str):
-        pass
+    def loads(data):
+        """Recover from portable string."""
+        return pickle.loads(codecs.decode(data.encode(), "base64"))
+
+
+    def dumps(self):
+        """Serialize self to portable string."""
+        return codecs.encode(pickle.dumps(self), "base64").decode()
 
 
     def __init__(self):
@@ -52,17 +59,12 @@ class KQuestionBase(object):
         output_dict = dict()
         output_dict.update(self._metadata)
         output_dict['description'] = self.description
-        output_dict['data'] = self.data
+        output_dict['data'] = self.dumps()
         return json.dumps(output_dict, indent=1)
 
 
     @abc.abstractproperty
     def description(self):
-        pass
-
-
-    @abc.abstractmethod
-    def dumps(self):
         pass
 
 
